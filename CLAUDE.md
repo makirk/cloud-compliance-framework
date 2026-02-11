@@ -46,7 +46,7 @@ In the assessment.md file:
 
 ### Complaince assessments
 
-If the service is not complaint with all freamworks, use the tearm "Partial Compliant" in the status
+If the service is not complaint with all freamworks, use the term "Partial Compliant" in the status
 
 
 AWS services in scope for FedRAMP
@@ -54,5 +54,10 @@ https://aws.amazon.com/compliance/services-in-scope/FedRAMP/
 
 AWS services in scope for SOC
 https://aws.amazon.com/compliance/services-in-scope/SOC/
+
+Azure services in scope use this pdf:
+https://servicetrust.microsoft.com/DocumentPage/7adf2d9e-d7b5-4e71-bad8-713e6a183cf3
+
+
 
 <!-- Document high-level architecture and key components -->
