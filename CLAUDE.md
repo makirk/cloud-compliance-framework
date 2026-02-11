@@ -26,12 +26,14 @@ In the assessment.md file:
 ├── [Cloud provider]
 │   ├── [Cloud Service]
 │      └── Assessment.md
+│      └── Code example (folder)
 │      └── Requirments
 │         └── [Requirments #1]
 │         └── [Requirments #2]
 ├── [Cloud provider]
 │   ├── [Cloud Service]
 │      └── Assessment.md
+│      └── Code example (folder)
 │      └── Requirments
 │         └── [Requirments #1]
 │         └── [Requirments #2]
@@ -58,6 +60,20 @@ https://aws.amazon.com/compliance/services-in-scope/SOC/
 Azure services in scope use this pdf:
 https://servicetrust.microsoft.com/DocumentPage/7adf2d9e-d7b5-4e71-bad8-713e6a183cf3
 
+### Code Examples
+
+Use the following coding language when creating the examples:
+Terraform for all Cloud providers
+ARM for Azure
+CDK i python for AWS
+
+
+### Requirments
+
+Use below website, to collect controls for AWS for each requreiment
+https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-controls-reference.html
+Create a .md file for each requirments
+Naming convestion for the requirments files [Req.id].[Req.Name].md, don't use - but space
 
 
 <!-- Document high-level architecture and key components -->
