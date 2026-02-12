@@ -1,0 +1,8 @@
+{
+  "app": "python3 app.py",
+  "context": {
+    "name_prefix": "compliant-eks",
+    "kubernetes_version": "1.31",
+    "environment": "production"
+  }
+}
