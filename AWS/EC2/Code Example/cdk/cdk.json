@@ -1,0 +1,10 @@
+{
+  "app": "python3 app.py",
+  "context": {
+    "name_prefix": "compliant-ec2",
+    "region": "us-east-1",
+    "allowed_ssh_cidr": "10.0.0.0/8",
+    "allowed_https_cidr": "10.0.0.0/8",
+    "flow_log_retention_days": 90
+  }
+}

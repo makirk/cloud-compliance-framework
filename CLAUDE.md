@@ -26,14 +26,18 @@ In the assessment.md file:
 ├── [Cloud provider]
 │   ├── [Cloud Service]
 │      └── Assessment.md
-│      └── Code example (folder)
+│      └── Code example
+│         └── [Coding laugauge #1]
+│         └── [Coding laugauge #1]
 │      └── Requirments
 │         └── [Requirments #1]
 │         └── [Requirments #2]
 ├── [Cloud provider]
 │   ├── [Cloud Service]
 │      └── Assessment.md
-│      └── Code example (folder)
+│      └── Code example
+│         └── [Coding laugauge #1]
+│         └── [Coding laugauge #1]
 │      └── Requirments
 │         └── [Requirments #1]
 │         └── [Requirments #2]
@@ -72,8 +76,13 @@ CDK i python for AWS
 
 Use below website, to collect controls for AWS for each requreiment
 https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-controls-reference.html
-Create a .md file for each requirments
-Naming convestion for the requirments files [Req.id].[Req.Name].md, don't use - but space
+Create a .md file for each requirments, file should contain:
+- Security control and Security control tit
+- Service
+- Applicable standards
+- Severity
+- Description
+
 
 
 <!-- Document high-level architecture and key components -->

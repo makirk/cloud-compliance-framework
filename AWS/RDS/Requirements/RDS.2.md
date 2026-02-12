@@ -2,6 +2,7 @@
 
 **Severity:** Critical
 **Service:** Amazon RDS
+**Applicable Standards:** AWS Foundational Security Best Practices v1.0.0, CIS AWS Foundations Benchmark v1.2.0
 
 ## Description
 This control checks whether RDS instances are publicly accessible by evaluating the publiclyAccessible field in the instance configuration item. The control fails if publiclyAccessible is set to true.

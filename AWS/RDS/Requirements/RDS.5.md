@@ -2,6 +2,7 @@
 
 **Severity:** Medium
 **Service:** Amazon RDS
+**Applicable Standards:** AWS Foundational Security Best Practices v1.0.0, CIS AWS Foundations Benchmark v1.2.0
 
 ## Description
 This control checks whether high availability is enabled for your RDS DB instances. The control fails if a DB instance is not configured for multiple Availability Zones (Multi-AZ).

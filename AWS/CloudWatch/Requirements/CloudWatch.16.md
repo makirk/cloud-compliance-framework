@@ -2,6 +2,7 @@
 
 **Severity:** Medium
 **Service:** Amazon CloudWatch
+**Applicable Standards:** AWS Foundational Security Best Practices v1.0.0, CIS AWS Foundations Benchmark v1.2.0
 
 ## Description
 This control checks whether a CloudWatch log group has a retention period of at least 365 days. The control fails if the retention period is less than 365 days.
