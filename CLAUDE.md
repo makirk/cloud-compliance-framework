@@ -77,7 +77,7 @@ CDK i python for AWS
 Use below website, to collect controls for AWS for each requreiment
 https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-controls-reference.html
 Create a .md file for each requirments, file should contain:
-- Security control and Security control tit
+- Security control id and Security control
 - Service
 - Applicable standards
 - Severity
