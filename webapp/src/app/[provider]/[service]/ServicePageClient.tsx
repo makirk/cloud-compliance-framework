@@ -14,21 +14,7 @@ import { FileText, Code, Shield, Download, FileDown } from 'lucide-react';
 import { ServiceInfo, Provider, Assessment, Requirement } from '@/types';
 import { parseAssessment } from '@/lib/parsers/assessment';
 import { exportAssessmentToPDF, exportRequirementsToCSV, exportRequirementsToPDF } from '@/lib/export';
-import { useCodeExamples } from '@/lib/hooks/useGitHub';
-
-const DEMO_SERVICES: Record<Provider, ServiceInfo[]> = {
-  AWS: [
-    { provider: 'AWS', name: 'EC2', path: 'AWS/EC2', hasAssessment: true, requirementsCount: 11, codeExamplesCount: 6 },
-    { provider: 'AWS', name: 'S3', path: 'AWS/S3', hasAssessment: true, requirementsCount: 5, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'IAM', path: 'AWS/IAM', hasAssessment: true, requirementsCount: 9, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'RDS', path: 'AWS/RDS', hasAssessment: true, requirementsCount: 7, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'Lambda', path: 'AWS/Lambda', hasAssessment: true, requirementsCount: 4, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'KMS', path: 'AWS/KMS', hasAssessment: true, requirementsCount: 5, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'VPC', path: 'AWS/VPC', hasAssessment: true, requirementsCount: 1, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'CloudWatch', path: 'AWS/CloudWatch', hasAssessment: true, requirementsCount: 3, codeExamplesCount: 0 },
-  ],
-  Azure: [],
-};
+import { useCodeExamples, useRepoTree } from '@/lib/hooks/useGitHub';
 
 const DEMO_ASSESSMENT = `# Amazon EC2 Compliance Assessment
 
@@ -105,6 +91,10 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
 
+  // Fetch dynamic service list from GitHub
+  const { data: repoTree } = useRepoTree();
+  const services = repoTree?.services || { AWS: [], Azure: [] };
+
   const {
     data: codeExamples = [],
     isLoading: isLoadingCodeExamples,
@@ -131,7 +121,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <Sidebar services={DEMO_SERVICES} />
+      <Sidebar services={services} />
 
       <main className="lg:pl-64 pt-16">
         <div className="px-4 sm:px-6 lg:px-8 py-8">

@@ -15,24 +15,9 @@ import {
   XCircle,
 } from 'lucide-react';
 import { ServiceInfo, Provider, ComplianceSummary } from '@/types';
-
-// Static data for the demo - in production this would come from GitHub API
-const DEMO_SERVICES: Record<Provider, ServiceInfo[]> = {
-  AWS: [
-    { provider: 'AWS', name: 'EC2', path: 'AWS/EC2', hasAssessment: true, requirementsCount: 11, codeExamplesCount: 6 },
-    { provider: 'AWS', name: 'S3', path: 'AWS/S3', hasAssessment: true, requirementsCount: 5, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'IAM', path: 'AWS/IAM', hasAssessment: true, requirementsCount: 9, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'RDS', path: 'AWS/RDS', hasAssessment: true, requirementsCount: 7, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'Lambda', path: 'AWS/Lambda', hasAssessment: true, requirementsCount: 4, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'KMS', path: 'AWS/KMS', hasAssessment: true, requirementsCount: 5, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'VPC', path: 'AWS/VPC', hasAssessment: true, requirementsCount: 1, codeExamplesCount: 0 },
-    { provider: 'AWS', name: 'CloudWatch', path: 'AWS/CloudWatch', hasAssessment: true, requirementsCount: 3, codeExamplesCount: 0 },
-  ],
-  Azure: [],
-};
+import { useRepoTree } from '@/lib/hooks/useGitHub';
 
 export default function DashboardPage() {
-  const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary] = useState<ComplianceSummary>({
     totalServices: 0,
     compliantServices: 0,
@@ -45,10 +30,13 @@ export default function DashboardPage() {
     lowRequirements: 0,
   });
 
+  // Fetch dynamic service list from GitHub
+  const { data: repoTree, isLoading } = useRepoTree();
+  const services = repoTree?.services || { AWS: [], Azure: [] };
+
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      const allServices = [...DEMO_SERVICES.AWS, ...DEMO_SERVICES.Azure];
+    if (repoTree?.services) {
+      const allServices = [...repoTree.services.AWS, ...repoTree.services.Azure];
       const totalReqs = allServices.reduce((sum, s) => sum + s.requirementsCount, 0);
 
       setSummary({
@@ -62,16 +50,13 @@ export default function DashboardPage() {
         mediumRequirements: Math.floor(totalReqs * 0.4),
         lowRequirements: Math.floor(totalReqs * 0.25),
       });
-      setIsLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [repoTree]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <Sidebar services={DEMO_SERVICES} />
+      <Sidebar services={services} />
 
       <main className="lg:pl-64 pt-16">
         <div className="px-4 sm:px-6 lg:px-8 py-8">
@@ -182,7 +167,7 @@ export default function DashboardPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <ServiceList services={DEMO_SERVICES.AWS} showProvider={false} />
+                    <ServiceList services={services.AWS} showProvider={false} />
                   </CardContent>
                 </Card>
 
@@ -196,8 +181,8 @@ export default function DashboardPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {DEMO_SERVICES.Azure.length > 0 ? (
-                      <ServiceList services={DEMO_SERVICES.Azure} showProvider={false} />
+                    {services.Azure.length > 0 ? (
+                      <ServiceList services={services.Azure} showProvider={false} />
                     ) : (
                       <div className="py-8 text-center text-gray-500">
                         No Azure services configured
