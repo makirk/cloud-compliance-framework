@@ -8,12 +8,14 @@ import { useComplianceStore } from '@/stores/compliance';
 import { Provider, ServiceInfo, RepoTree, Assessment, Requirement } from '@/types';
 
 export function useRepoTree() {
-  const { setRepoTree, setError } = useComplianceStore();
+  const { setRepoTree, setError, githubConfig } = useComplianceStore();
 
   return useQuery({
     queryKey: ['repoTree'],
     queryFn: async (): Promise<RepoTree> => {
       try {
+        // Ensure client is configured with current settings
+        githubClient.configure(githubConfig);
         const tree = await githubClient.getRepoTree();
 
         const providers: Provider[] = [];

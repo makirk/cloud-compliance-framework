@@ -14,6 +14,7 @@ import { FileText, Code, Shield, Download, FileDown } from 'lucide-react';
 import { ServiceInfo, Provider, Assessment, Requirement } from '@/types';
 import { parseAssessment } from '@/lib/parsers/assessment';
 import { exportAssessmentToPDF, exportRequirementsToCSV, exportRequirementsToPDF } from '@/lib/export';
+import { useCodeExamples } from '@/lib/hooks/useGitHub';
 
 const DEMO_SERVICES: Record<Provider, ServiceInfo[]> = {
   AWS: [
@@ -88,54 +89,6 @@ const DEMO_REQUIREMENTS: Requirement[] = [
   },
 ];
 
-const DEMO_CODE_EXAMPLES = [
-  {
-    path: 'AWS/EC2/Code Example/terraform/main.tf',
-    language: 'terraform',
-    content: `# EC2 Compliant Terraform Template
-
-resource "aws_ebs_encryption_by_default" "enabled" {
-  enabled = true
-}
-
-resource "aws_instance" "main" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
-
-  # EC2.8: Require IMDSv2
-  metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "required"
-  }
-
-  # EC2.3: EBS encrypted
-  root_block_device {
-    encrypted = true
-  }
-}`,
-  },
-  {
-    path: 'AWS/EC2/Code Example/cdk/ec2_stack.py',
-    language: 'python',
-    content: `from aws_cdk import aws_ec2 as ec2, Stack
-from constructs import Construct
-
-class Ec2CompliantStack(Stack):
-    def __init__(self, scope: Construct, id: str, **kwargs):
-        super().__init__(scope, id, **kwargs)
-
-        instance = ec2.Instance(
-            self, "Instance",
-            instance_type=ec2.InstanceType.of(
-                ec2.InstanceClass.T3,
-                ec2.InstanceSize.MICRO,
-            ),
-            machine_image=ec2.MachineImage.latest_amazon_linux2023(),
-            require_imdsv2=True,  # EC2.8
-        )`,
-  },
-];
-
 interface ServicePageClientProps {
   provider: string;
   service: string;
@@ -151,6 +104,12 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
   const [isLoading, setIsLoading] = useState(true);
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
+
+  const {
+    data: codeExamples = [],
+    isLoading: isLoadingCodeExamples,
+    error: codeExamplesError
+  } = useCodeExamples(providerUpper, serviceUpper);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -264,7 +223,17 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                     <CardTitle>Infrastructure as Code Examples</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CodeTabs files={DEMO_CODE_EXAMPLES} />
+                    {isLoadingCodeExamples ? (
+                      <div className="space-y-4">
+                        <CardSkeleton />
+                      </div>
+                    ) : codeExamplesError ? (
+                      <div className="text-center py-8 text-red-600">
+                        Failed to load code examples. Please try again later.
+                      </div>
+                    ) : (
+                      <CodeTabs files={codeExamples} />
+                    )}
                   </CardContent>
                 </Card>
               )}

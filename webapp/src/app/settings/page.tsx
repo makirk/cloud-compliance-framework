@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/Button';
 import { Settings, Github, RefreshCw, Trash2 } from 'lucide-react';
 import { Provider, ServiceInfo } from '@/types';
+import { githubClient } from '@/lib/github/client';
+import { useComplianceStore } from '@/stores/compliance';
 
 const DEMO_SERVICES: Record<Provider, ServiceInfo[]> = {
   AWS: [],
@@ -15,18 +17,41 @@ const DEMO_SERVICES: Record<Provider, ServiceInfo[]> = {
 };
 
 export default function SettingsPage() {
-  const [owner, setOwner] = useState('your-org');
+  const { githubConfig, setGitHubConfig } = useComplianceStore();
+  const [owner, setOwner] = useState('makirk');
   const [repo, setRepo] = useState('cloud-compliance-framework');
   const [branch, setBranch] = useState('main');
   const [token, setToken] = useState('');
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
 
+  useEffect(() => {
+    setOwner(githubConfig.owner);
+    setRepo(githubConfig.repo);
+    setBranch(githubConfig.branch);
+    setToken(githubConfig.token || '');
+  }, [githubConfig]);
+
   const handleSave = async () => {
     setSaving(true);
-    // Simulate save
+
+    // Update the store
+    setGitHubConfig({ owner, repo, branch, token: token || undefined });
+
+    // Update the GitHub client
+    githubClient.configure({ owner, repo, branch, token: token || undefined });
+
+    // Clear cache to force refresh
+    if (typeof window !== 'undefined') {
+      const keys = Object.keys(localStorage).filter((k) => k.startsWith('ccf_cache_'));
+      keys.forEach((key) => localStorage.removeItem(key));
+    }
+
     await new Promise((resolve) => setTimeout(resolve, 500));
     setSaving(false);
+
+    // Reload the page to fetch new data
+    window.location.reload();
   };
 
   const handleClearCache = async () => {

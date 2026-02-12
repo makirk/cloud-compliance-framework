@@ -68,12 +68,14 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
     framework: [],
   },
 
-  // GitHub config
-  githubConfig: {
-    owner: 'your-org',
-    repo: 'cloud-compliance-framework',
-    branch: 'main',
-  },
+  // GitHub config - load from localStorage or use defaults
+  githubConfig: typeof window !== 'undefined' && localStorage.getItem('github_config')
+    ? JSON.parse(localStorage.getItem('github_config')!)
+    : {
+        owner: 'makirk',
+        repo: 'cloud-compliance-framework',
+        branch: 'main',
+      },
 
   // Actions
   setRepoTree: (tree) => set({ repoTree: tree }),
@@ -106,9 +108,14 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
     filters: { ...state.filters, ...filters },
   })),
 
-  setGitHubConfig: (config) => set((state) => ({
-    githubConfig: { ...state.githubConfig, ...config },
-  })),
+  setGitHubConfig: (config) => set((state) => {
+    const newConfig = { ...state.githubConfig, ...config };
+    // Persist to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('github_config', JSON.stringify(newConfig));
+    }
+    return { githubConfig: newConfig };
+  }),
 
   // Computed helpers
   getServiceKey: (provider, service) => `${provider}/${service}`,

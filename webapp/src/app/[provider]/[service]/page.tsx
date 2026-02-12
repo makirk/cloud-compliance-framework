@@ -11,6 +11,7 @@ export function generateStaticParams() {
     { provider: 'aws', service: 'kms' },
     { provider: 'aws', service: 'vpc' },
     { provider: 'aws', service: 'cloudwatch' },
+    { provider: 'aws', service: 'EKS' },
   ];
 
   return services;

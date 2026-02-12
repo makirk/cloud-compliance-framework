@@ -4,7 +4,7 @@ const GITHUB_API_BASE = 'https://api.github.com';
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes
 
 // Default repo configuration - can be overridden
-const DEFAULT_OWNER = 'your-org';
+const DEFAULT_OWNER = 'makirk';
 const DEFAULT_REPO = 'cloud-compliance-framework';
 const DEFAULT_BRANCH = 'main';
 
