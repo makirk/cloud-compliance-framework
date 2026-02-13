@@ -15,10 +15,13 @@ export function RequirementDetail({ requirement }: RequirementDetailProps) {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="font-mono text-lg font-bold text-blue-600">
                 {requirement.id}
               </span>
+              <Badge variant={requirement.type === 'SEC' ? 'blue' : 'purple'}>
+                {requirement.type === 'SEC' ? 'Security' : 'Operational'}
+              </Badge>
               <SeverityBadge severity={requirement.severity} />
               <ProviderBadge provider={requirement.provider} />
             </div>

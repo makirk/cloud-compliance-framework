@@ -84,5 +84,24 @@ Create a .md file for each requirments, file should contain:
 - Description
 
 
+### Naming convestion for Requirments
+
+Use the following naming convention for Requirments for the files:
+
+[ServiceShortname].[Type].[ID]
+
+Use the following naming convention for Requirments in the .md files
+
+use this naming convention: [ServiceShortname].[Type].[ID].[RequirmentName]
+
+
+
+ServiceShortname: a short name for the service
+
+Type: 
+- OPS for operational
+- SEC for Security
+
+ID must be uniq
 
 <!-- Document high-level architecture and key components -->

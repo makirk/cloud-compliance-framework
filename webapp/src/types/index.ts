@@ -3,6 +3,7 @@
 export type Provider = 'AWS' | 'Azure';
 export type ComplianceStatus = 'Compliant' | 'Partial Compliant' | 'Not Compliant';
 export type Severity = 'Critical' | 'High' | 'Medium' | 'Low';
+export type RequirementType = 'SEC' | 'OPS';
 
 export interface FrameworkDetail {
   level: string;
@@ -26,6 +27,7 @@ export interface Assessment {
 export interface Requirement {
   id: string;
   title: string;
+  type: RequirementType;
   severity: Severity;
   service: string;
   provider: Provider;

@@ -1,0 +1,10 @@
+# EC2.SEC.1.EBS-Snapshots-Public: EBS snapshots should not be publicly restorable
+
+**Severity:** Critical
+**Service:** Amazon EC2
+**Applicable Standards:** AWS Foundational Security Best Practices v1.0.0, CIS AWS Foundations Benchmark v1.2.0
+
+## Description
+This control checks whether Amazon Elastic Block Store (EBS) snapshots are not publicly restorable. EBS snapshots should not be publicly restorable by everyone unless you explicitly allow it, to avoid accidental exposure of your company's sensitive data.
+
+Source: https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-1

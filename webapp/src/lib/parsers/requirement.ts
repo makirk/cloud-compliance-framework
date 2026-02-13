@@ -1,15 +1,57 @@
-import { Requirement, Severity, Provider } from '@/types';
+import { Requirement, Severity, Provider, RequirementType } from '@/types';
 
-export function parseRequirement(content: string, provider: Provider, service: string): Requirement {
+/**
+ * Extracts requirement type and ID from file path or content
+ * Supports both old format (EC2.1.md) and new format (EC2.SEC.1.md or EC2.OPS.1.md)
+ */
+function extractTypeAndId(content: string, filePath?: string): {
+  type: RequirementType;
+  id: string;
+} {
+  // Try new format first from file path
+  // Pattern: [Service].[SEC|OPS].[Number].md
+  if (filePath) {
+    const newFormatMatch = filePath.match(/\/([A-Z][a-zA-Z0-9]*)\.(SEC|OPS)\.(\d+)\.md$/);
+    if (newFormatMatch) {
+      const [, serviceName, type, number] = newFormatMatch;
+      return {
+        type: type as RequirementType,
+        id: `${serviceName}.${type}.${number}`
+      };
+    }
+  }
+
+  // Fall back to extracting from heading
+  const titleMatch = content.match(/^#\s+([^\n]+)/m);
+  const fullTitle = titleMatch ? titleMatch[1].trim() : 'Unknown';
+
+  // Try new format in heading: EC2.SEC.1.RequirementName or EC2.OPS.1.RequirementName
+  const newHeadingMatch = fullTitle.match(/^([A-Z][a-zA-Z0-9]*)\.(SEC|OPS)\.(\d+)/);
+  if (newHeadingMatch) {
+    const [, serviceName, type, number] = newHeadingMatch;
+    return {
+      type: type as RequirementType,
+      id: `${serviceName}.${type}.${number}`
+    };
+  }
+
+  // Old format in heading: EC2.1
+  const oldHeadingMatch = fullTitle.match(/^([A-Z0-9]+\.\d+)/);
+  return {
+    type: 'SEC', // Default old files to Security
+    id: oldHeadingMatch ? oldHeadingMatch[1] : 'Unknown'
+  };
+}
+
+export function parseRequirement(content: string, provider: Provider, service: string, filePath?: string): Requirement {
   const lines = content.split('\n');
+
+  // Extract type and ID (supports both old and new naming conventions)
+  const { type, id } = extractTypeAndId(content, filePath);
 
   // Extract title from first heading
   const titleMatch = content.match(/^#\s+([^\n]+)/m);
   const fullTitle = titleMatch ? titleMatch[1].trim() : 'Unknown Requirement';
-
-  // Extract ID from title (e.g., "EC2.1: EBS snapshots..." -> "EC2.1")
-  const idMatch = fullTitle.match(/^([A-Z0-9]+\.\d+)/);
-  const id = idMatch ? idMatch[1] : 'Unknown';
 
   // Extract the descriptive title (after the colon)
   const title = fullTitle.includes(':')
@@ -42,6 +84,7 @@ export function parseRequirement(content: string, provider: Provider, service: s
   return {
     id,
     title,
+    type,
     severity,
     service,
     provider,
@@ -97,11 +140,15 @@ export function parseRequirements(
 ): Requirement[] {
   return files
     .filter(f => f.path.endsWith('.md'))
-    .map(f => parseRequirement(f.content, provider, service))
+    .map(f => parseRequirement(f.content, provider, service, f.path))
     .sort((a, b) => {
-      // Sort by ID numerically (EC2.1, EC2.2, EC2.10, etc.)
-      const aNum = parseInt(a.id.split('.')[1] || '0');
-      const bNum = parseInt(b.id.split('.')[1] || '0');
+      // Sort by type first (SEC before OPS), then by ID numerically
+      if (a.type !== b.type) {
+        return a.type === 'SEC' ? -1 : 1;
+      }
+      // Extract numeric part for sorting (handles both old and new formats)
+      const aNum = parseInt(a.id.split('.').pop() || '0');
+      const bNum = parseInt(b.id.split('.').pop() || '0');
       return aNum - bNum;
     });
 }

@@ -140,17 +140,21 @@ export function useRequirements(provider: Provider, service: string) {
       for (const path of requirementPaths) {
         try {
           const content = await localClient.getFileContent(path);
-          const requirement = parseRequirement(content, provider, service);
+          const requirement = parseRequirement(content, provider, service, path);
           requirements.push(requirement);
         } catch (error) {
           console.error(`Failed to fetch requirement: ${path}`, error);
         }
       }
 
-      // Sort by ID
+      // Sort by type first (SEC before OPS), then by ID numerically
       requirements.sort((a, b) => {
-        const aNum = parseInt(a.id.split('.')[1] || '0');
-        const bNum = parseInt(b.id.split('.')[1] || '0');
+        if (a.type !== b.type) {
+          return a.type === 'SEC' ? -1 : 1;
+        }
+        // Extract numeric part for sorting (handles both old and new formats)
+        const aNum = parseInt(a.id.split('.').pop() || '0');
+        const bNum = parseInt(b.id.split('.').pop() || '0');
         return aNum - bNum;
       });
 

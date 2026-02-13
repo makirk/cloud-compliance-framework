@@ -2,10 +2,11 @@ import { jsPDF } from 'jspdf';
 import { Assessment, Requirement } from '@/types';
 
 export function exportRequirementsToCSV(requirements: Requirement[], filename = 'requirements.csv'): void {
-  const headers = ['ID', 'Title', 'Severity', 'Service', 'Provider', 'Applicable Standards', 'Description', 'Source URL'];
+  const headers = ['ID', 'Type', 'Title', 'Severity', 'Service', 'Provider', 'Applicable Standards', 'Description', 'Source URL'];
 
   const rows = requirements.map(req => [
     req.id,
+    req.type === 'SEC' ? 'Security' : 'Operational',
     `"${req.title.replace(/"/g, '""')}"`,
     req.severity,
     req.service,
@@ -104,15 +105,21 @@ export function exportRequirementsToPDF(requirements: Requirement[], title = 'Re
       yPosition = 20;
     }
 
-    // ID and Severity
+    // ID, Type, and Severity
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text(req.id, 20, yPosition);
 
+    // Type
+    const typeColor = req.type === 'SEC' ? { r: 59, g: 130, b: 246 } : { r: 147, g: 51, b: 234 };
+    doc.setTextColor(typeColor.r, typeColor.g, typeColor.b);
+    doc.setFontSize(9);
+    doc.text(`[${req.type === 'SEC' ? 'Security' : 'Operational'}]`, 45, yPosition);
+
+    // Severity
     const severityColor = getSeverityColorRGB(req.severity);
     doc.setTextColor(severityColor.r, severityColor.g, severityColor.b);
-    doc.setFontSize(9);
-    doc.text(`[${req.severity}]`, 45, yPosition);
+    doc.text(`[${req.severity}]`, 85, yPosition);
     doc.setTextColor(0);
     yPosition += 6;
 

@@ -26,10 +26,13 @@ export function RequirementCard({
       <CardContent className={compact ? 'py-3' : 'py-4'}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="font-mono text-sm font-semibold text-blue-600">
                 {requirement.id}
               </span>
+              <Badge variant={requirement.type === 'SEC' ? 'blue' : 'purple'} size="sm">
+                {requirement.type === 'SEC' ? 'Security' : 'Operational'}
+              </Badge>
               <SeverityBadge severity={requirement.severity} />
             </div>
 
