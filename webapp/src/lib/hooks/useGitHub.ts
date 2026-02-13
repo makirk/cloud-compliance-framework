@@ -1,22 +1,21 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { githubClient } from '@/lib/github/client';
+import { localClient } from '@/lib/api/localClient';
 import { parseAssessment } from '@/lib/parsers/assessment';
 import { parseRequirement } from '@/lib/parsers/requirement';
 import { useComplianceStore } from '@/stores/compliance';
 import { Provider, ServiceInfo, RepoTree, Assessment, Requirement } from '@/types';
 
 export function useRepoTree() {
-  const { setRepoTree, setError, githubConfig } = useComplianceStore();
+  const { setRepoTree, setError } = useComplianceStore();
 
   return useQuery({
     queryKey: ['repoTree'],
     queryFn: async (): Promise<RepoTree> => {
       try {
-        // Ensure client is configured with current settings
-        githubClient.configure(githubConfig);
-        const tree = await githubClient.getRepoTree();
+        // Fetch from local file system via API routes
+        const tree = await localClient.getRepoTree();
 
         const providers: Provider[] = [];
         const services: Record<Provider, ServiceInfo[]> = {
@@ -110,7 +109,7 @@ export function useAssessment(provider: Provider, service: string) {
   return useQuery({
     queryKey: ['assessment', provider, service],
     queryFn: async (): Promise<Assessment> => {
-      const content = await githubClient.getFileContent(`${key}/assessment.md`);
+      const content = await localClient.getFileContent(`${key}/assessment.md`);
       const assessment = parseAssessment(content, provider, service);
       addAssessment(key, assessment);
       return assessment;
@@ -127,7 +126,7 @@ export function useRequirements(provider: Provider, service: string) {
     queryKey: ['requirements', provider, service],
     queryFn: async (): Promise<Requirement[]> => {
       // First, get the list of requirement files
-      const tree = await githubClient.getRepoTree();
+      const tree = await localClient.getRepoTree();
       const requirementPaths = tree.tree
         .filter(
           (item) =>
@@ -140,7 +139,7 @@ export function useRequirements(provider: Provider, service: string) {
       const requirements: Requirement[] = [];
       for (const path of requirementPaths) {
         try {
-          const content = await githubClient.getFileContent(path);
+          const content = await localClient.getFileContent(path);
           const requirement = parseRequirement(content, provider, service);
           requirements.push(requirement);
         } catch (error) {
@@ -168,7 +167,7 @@ export function useCodeExamples(provider: Provider, service: string) {
   return useQuery({
     queryKey: ['codeExamples', provider, service],
     queryFn: async () => {
-      const tree = await githubClient.getRepoTree();
+      const tree = await localClient.getRepoTree();
 
       // Find code example files
       const codeFiles = tree.tree.filter(
@@ -185,7 +184,7 @@ export function useCodeExamples(provider: Provider, service: string) {
 
       for (const file of codeFiles) {
         try {
-          const content = await githubClient.getFileContent(file.path);
+          const content = await localClient.getFileContent(file.path);
 
           // Determine language
           let language = 'text';

@@ -12,68 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import { FileText, Code, Shield, Download, FileDown } from 'lucide-react';
 import { ServiceInfo, Provider, Assessment, Requirement } from '@/types';
-import { parseAssessment } from '@/lib/parsers/assessment';
 import { exportAssessmentToPDF, exportRequirementsToCSV, exportRequirementsToPDF } from '@/lib/export';
-import { useCodeExamples, useRepoTree } from '@/lib/hooks/useGitHub';
-
-const DEMO_ASSESSMENT = `# Amazon EC2 Compliance Assessment
-
-**Last Reviewed:** 2026-02-11
-
-## FedRAMP
-
-**Status:** <span style="color:green">Compliant</span>
-
-| Authorization Level | Status |
-|---------------------|--------|
-| FedRAMP Moderate (East/West) | Authorized |
-| FedRAMP High (GovCloud) | Authorized |
-
-Source: https://aws.amazon.com/compliance/services-in-scope/FedRAMP/
-
-## SOC
-
-**Status:** <span style="color:green">Compliant</span>
-
-| Certification | Status |
-|---------------|--------|
-| SOC 1, 2, 3 | In Scope |
-
-Source: https://aws.amazon.com/compliance/services-in-scope/SOC/
-`;
-
-const DEMO_REQUIREMENTS: Requirement[] = [
-  {
-    id: 'EC2.1',
-    title: 'EBS snapshots should not be publicly restorable',
-    severity: 'Critical',
-    service: 'EC2',
-    provider: 'AWS',
-    applicableStandards: ['AWS Foundational Security Best Practices v1.0.0', 'CIS AWS Foundations Benchmark v1.2.0'],
-    description: 'This control checks whether Amazon Elastic Block Store (EBS) snapshots are not publicly restorable.',
-    sourceUrl: 'https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-1',
-  },
-  {
-    id: 'EC2.2',
-    title: 'VPC default security groups should not allow inbound or outbound traffic',
-    severity: 'High',
-    service: 'EC2',
-    provider: 'AWS',
-    applicableStandards: ['AWS Foundational Security Best Practices v1.0.0'],
-    description: 'This control checks that the default security group of a VPC does not allow inbound or outbound traffic.',
-    sourceUrl: 'https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-2',
-  },
-  {
-    id: 'EC2.3',
-    title: 'Attached Amazon EBS volumes should be encrypted at rest',
-    severity: 'Medium',
-    service: 'EC2',
-    provider: 'AWS',
-    applicableStandards: ['AWS Foundational Security Best Practices v1.0.0'],
-    description: 'This control checks whether the EBS volumes that are in an attached state are encrypted.',
-    sourceUrl: 'https://docs.aws.amazon.com/securityhub/latest/userguide/ec2-controls.html#ec2-3',
-  },
-];
+import { useCodeExamples, useRepoTree, useRequirements, useAssessment } from '@/lib/hooks/useGitHub';
 
 interface ServicePageClientProps {
   provider: string;
@@ -84,33 +24,39 @@ type TabType = 'assessment' | 'requirements' | 'code';
 
 export function ServicePageClient({ provider, service }: ServicePageClientProps) {
   const providerUpper = provider.toUpperCase() as Provider;
-  const serviceUpper = service.toUpperCase();
 
   const [activeTab, setActiveTab] = useState<TabType>('assessment');
-  const [isLoading, setIsLoading] = useState(true);
-  const [assessment, setAssessment] = useState<Assessment | null>(null);
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
 
   // Fetch dynamic service list from GitHub
   const { data: repoTree } = useRepoTree();
   const services = repoTree?.services || { AWS: [], Azure: [] };
 
+  // Find the actual service name from the repository (handles case sensitivity)
+  // e.g., URL "cloudwatch" -> actual directory "CloudWatch"
+  const actualServiceName = services[providerUpper]?.find(
+    (s) => s.name.toLowerCase() === service.toLowerCase()
+  )?.name || service.toUpperCase();
+
+  // Fetch dynamic assessment from GitHub
+  const {
+    data: assessment,
+    isLoading: isLoadingAssessment,
+    error: assessmentError
+  } = useAssessment(providerUpper, actualServiceName);
+
+  // Fetch dynamic requirements from GitHub
+  const {
+    data: requirements = [],
+    isLoading: isLoadingRequirements,
+    error: requirementsError
+  } = useRequirements(providerUpper, actualServiceName);
+
+  // Fetch dynamic code examples from GitHub
   const {
     data: codeExamples = [],
     isLoading: isLoadingCodeExamples,
     error: codeExamplesError
-  } = useCodeExamples(providerUpper, serviceUpper);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const parsedAssessment = parseAssessment(DEMO_ASSESSMENT, providerUpper, serviceUpper);
-      setAssessment(parsedAssessment);
-      setRequirements(DEMO_REQUIREMENTS);
-      setIsLoading(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [providerUpper, serviceUpper]);
+  } = useCodeExamples(providerUpper, actualServiceName);
 
   const tabs = [
     { id: 'assessment' as const, label: 'Assessment', icon: Shield },
@@ -128,7 +74,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
           <Breadcrumb
             items={[
               { label: providerUpper, href: `/${provider}` },
-              { label: serviceUpper },
+              { label: actualServiceName },
             ]}
             className="mb-6"
           />
@@ -136,7 +82,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {providerUpper} {serviceUpper}
+                {providerUpper} {actualServiceName}
               </h1>
               <p className="mt-1 text-gray-500">
                 Compliance assessment and security requirements
@@ -151,7 +97,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                   if (activeTab === 'assessment' && assessment) {
                     exportAssessmentToPDF(assessment);
                   } else if (activeTab === 'requirements') {
-                    exportRequirementsToPDF(requirements, `${providerUpper} ${serviceUpper} Requirements`);
+                    exportRequirementsToPDF(requirements, `${providerUpper} ${actualServiceName} Requirements`);
                   }
                 }}
                 disabled={activeTab === 'code'}
@@ -164,7 +110,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                 size="sm"
                 onClick={() => {
                   if (activeTab === 'requirements') {
-                    exportRequirementsToCSV(requirements, `${providerUpper}-${serviceUpper}-requirements.csv`);
+                    exportRequirementsToCSV(requirements, `${providerUpper}-${actualServiceName}-requirements.csv`);
                   }
                 }}
                 disabled={activeTab !== 'requirements'}
@@ -192,19 +138,63 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
             ))}
           </div>
 
-          {isLoading ? (
-            <div className="space-y-4">
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-          ) : (
-            <>
-              {activeTab === 'assessment' && assessment && (
-                <AssessmentViewer assessment={assessment} />
-              )}
+          <>
+            {activeTab === 'assessment' && (
+              <>
+                {isLoadingAssessment ? (
+                  <div className="space-y-4">
+                    <CardSkeleton />
+                    <CardSkeleton />
+                  </div>
+                ) : assessmentError ? (
+                  <Card>
+                    <CardContent>
+                      <div className="text-center py-8 text-red-600">
+                        Failed to load assessment. Please try again later.
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : !assessment ? (
+                  <Card>
+                    <CardContent>
+                      <div className="text-center py-8 text-gray-500">
+                        No assessment available
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <AssessmentViewer assessment={assessment} />
+                )}
+              </>
+            )}
 
-              {activeTab === 'requirements' && (
-                <RequirementsList requirements={requirements} />
+            {activeTab === 'requirements' && (
+                <>
+                  {isLoadingRequirements ? (
+                    <div className="space-y-4">
+                      <CardSkeleton />
+                      <CardSkeleton />
+                    </div>
+                  ) : requirementsError ? (
+                    <Card>
+                      <CardContent>
+                        <div className="text-center py-8 text-red-600">
+                          Failed to load requirements. Please try again later.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : requirements.length === 0 ? (
+                    <Card>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          No requirements available
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <RequirementsList requirements={requirements} />
+                  )}
+                </>
               )}
 
               {activeTab === 'code' && (
@@ -227,8 +217,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                   </CardContent>
                 </Card>
               )}
-            </>
-          )}
+          </>
         </div>
       </main>
     </div>
