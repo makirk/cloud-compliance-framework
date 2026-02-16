@@ -74,8 +74,13 @@ CDK i python for AWS
 
 ### Requirments
 
-Use below website, to collect controls for AWS for each requreiment
+Use below webiste, to collect requirment for AWS services
 https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-controls-reference.html
+
+Use below webiste, to collect requirment for Azure services:
+https://learn.microsoft.com/en-us/security/benchmark/azure/security-baselines-overview
+
+
 Create a .md file for each requirments, file should contain:
 - Security control id and Security control
 - Service
