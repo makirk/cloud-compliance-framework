@@ -170,7 +170,7 @@ resource "azurerm_virtual_machine_extension" "aad_login" {
   type_handler_version = "1.0"
 }
 
-# VM.SEC.7 - Microsoft Defender for Endpoint
+# VM.SEC.7, VM.SEC.10 - Microsoft Defender for Endpoint (threat detection + anti-malware)
 resource "azurerm_virtual_machine_extension" "defender" {
   name                 = "MDE.Linux"
   virtual_machine_id   = azurerm_linux_virtual_machine.main.id
@@ -193,6 +193,18 @@ resource "azurerm_virtual_machine_extension" "monitor_agent" {
 
   depends_on = [azurerm_virtual_machine_extension.defender]
 }
+
+# VM.SEC.8 - Vulnerability Assessment (Microsoft Defender for Cloud)
+resource "azurerm_security_center_subscription_pricing" "vm" {
+  tier          = "Standard"
+  resource_type = "VirtualMachines"
+  subplan       = "P2"
+}
+
+# VM.OPS.4 - Adaptive Application Controls (enabled via Defender for Cloud)
+# Adaptive application controls are configured at the subscription level
+# through Microsoft Defender for Cloud. The security_center_subscription_pricing
+# resource above (VM.SEC.8) enables the Defender plan which includes this feature.
 
 # VM.OPS.2 - Azure Backup
 resource "azurerm_recovery_services_vault" "main" {

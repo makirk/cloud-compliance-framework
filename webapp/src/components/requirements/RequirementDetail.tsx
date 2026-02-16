@@ -19,7 +19,7 @@ export function RequirementDetail({ requirement }: RequirementDetailProps) {
               <span className="font-mono text-lg font-bold text-blue-600">
                 {requirement.id}
               </span>
-              <Badge variant={requirement.type === 'SEC' ? 'blue' : 'purple'}>
+              <Badge variant={requirement.type === 'SEC' ? 'info' : 'default'}>
                 {requirement.type === 'SEC' ? 'Security' : 'Operational'}
               </Badge>
               <SeverityBadge severity={requirement.severity} />

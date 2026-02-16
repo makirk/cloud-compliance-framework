@@ -23,7 +23,7 @@ interface ServicePageClientProps {
 type TabType = 'assessment' | 'requirements' | 'code';
 
 export function ServicePageClient({ provider, service }: ServicePageClientProps) {
-  const providerUpper = provider.toUpperCase() as Provider;
+  const providerNormalized = (provider.toLowerCase() === 'aws' ? 'AWS' : provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase()) as Provider;
 
   const [activeTab, setActiveTab] = useState<TabType>('assessment');
 
@@ -33,7 +33,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
 
   // Find the actual service name from the repository (handles case sensitivity)
   // e.g., URL "cloudwatch" -> actual directory "CloudWatch"
-  const actualServiceName = services[providerUpper]?.find(
+  const actualServiceName = services[providerNormalized]?.find(
     (s) => s.name.toLowerCase() === service.toLowerCase()
   )?.name || service.toUpperCase();
 
@@ -42,21 +42,21 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
     data: assessment,
     isLoading: isLoadingAssessment,
     error: assessmentError
-  } = useAssessment(providerUpper, actualServiceName);
+  } = useAssessment(providerNormalized, actualServiceName);
 
   // Fetch dynamic requirements from GitHub
   const {
     data: requirements = [],
     isLoading: isLoadingRequirements,
     error: requirementsError
-  } = useRequirements(providerUpper, actualServiceName);
+  } = useRequirements(providerNormalized, actualServiceName);
 
   // Fetch dynamic code examples from GitHub
   const {
     data: codeExamples = [],
     isLoading: isLoadingCodeExamples,
     error: codeExamplesError
-  } = useCodeExamples(providerUpper, actualServiceName);
+  } = useCodeExamples(providerNormalized, actualServiceName);
 
   const tabs = [
     { id: 'assessment' as const, label: 'Assessment', icon: Shield },
@@ -73,7 +73,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
         <div className="px-4 sm:px-6 lg:px-8 py-8">
           <Breadcrumb
             items={[
-              { label: providerUpper, href: `/${provider}` },
+              { label: providerNormalized, href: `/${provider}` },
               { label: actualServiceName },
             ]}
             className="mb-6"
@@ -82,7 +82,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {providerUpper} {actualServiceName}
+                {providerNormalized} {actualServiceName}
               </h1>
               <p className="mt-1 text-gray-500">
                 Compliance assessment and security requirements
@@ -97,7 +97,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                   if (activeTab === 'assessment' && assessment) {
                     exportAssessmentToPDF(assessment);
                   } else if (activeTab === 'requirements') {
-                    exportRequirementsToPDF(requirements, `${providerUpper} ${actualServiceName} Requirements`);
+                    exportRequirementsToPDF(requirements, `${providerNormalized} ${actualServiceName} Requirements`);
                   }
                 }}
                 disabled={activeTab === 'code'}
@@ -110,7 +110,7 @@ export function ServicePageClient({ provider, service }: ServicePageClientProps)
                 size="sm"
                 onClick={() => {
                   if (activeTab === 'requirements') {
-                    exportRequirementsToCSV(requirements, `${providerUpper}-${actualServiceName}-requirements.csv`);
+                    exportRequirementsToCSV(requirements, `${providerNormalized}-${actualServiceName}-requirements.csv`);
                   }
                 }}
                 disabled={activeTab !== 'requirements'}

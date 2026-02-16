@@ -30,7 +30,7 @@ export function RequirementCard({
               <span className="font-mono text-sm font-semibold text-blue-600">
                 {requirement.id}
               </span>
-              <Badge variant={requirement.type === 'SEC' ? 'blue' : 'purple'} size="sm">
+              <Badge variant={requirement.type === 'SEC' ? 'info' : 'default'} size="sm">
                 {requirement.type === 'SEC' ? 'Security' : 'Operational'}
               </Badge>
               <SeverityBadge severity={requirement.severity} />

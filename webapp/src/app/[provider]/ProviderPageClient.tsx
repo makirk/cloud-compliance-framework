@@ -14,12 +14,12 @@ interface ProviderPageClientProps {
 }
 
 export function ProviderPageClient({ provider }: ProviderPageClientProps) {
-  const providerUpper = provider.toUpperCase() as Provider;
+  const providerNormalized = (provider.toLowerCase() === 'aws' ? 'AWS' : provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase()) as Provider;
 
   // Fetch dynamic service list from GitHub
   const { data: repoTree } = useRepoTree();
   const allServices = repoTree?.services || { AWS: [], Azure: [] };
-  const services = allServices[providerUpper] || [];
+  const services = allServices[providerNormalized] || [];
 
   const totalRequirements = services.reduce((sum, s) => sum + s.requirementsCount, 0);
   const totalCodeExamples = services.reduce((sum, s) => sum + s.codeExamplesCount, 0);
@@ -32,7 +32,7 @@ export function ProviderPageClient({ provider }: ProviderPageClientProps) {
       <main className="lg:pl-64 pt-16">
         <div className="px-4 sm:px-6 lg:px-8 py-8">
           <Breadcrumb
-            items={[{ label: providerUpper }]}
+            items={[{ label: providerNormalized }]}
             className="mb-6"
           />
 
@@ -40,11 +40,11 @@ export function ProviderPageClient({ provider }: ProviderPageClientProps) {
             <div className="flex items-center gap-3 mb-2">
               <Cloud className="w-8 h-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-900">
-                {providerUpper}
+                {providerNormalized}
               </h1>
             </div>
             <p className="text-gray-500">
-              Compliance assessments and security requirements for {providerUpper} services
+              Compliance assessments and security requirements for {providerNormalized} services
             </p>
           </div>
 
@@ -93,7 +93,7 @@ export function ProviderPageClient({ provider }: ProviderPageClientProps) {
                 <ServiceList services={services} showProvider={false} />
               ) : (
                 <div className="py-12 text-center text-gray-500">
-                  No services available for {providerUpper}
+                  No services available for {providerNormalized}
                 </div>
               )}
             </CardContent>

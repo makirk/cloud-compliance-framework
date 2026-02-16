@@ -234,6 +234,22 @@
       }
     },
     {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2023-07-01",
+      "name": "[concat(parameters('vmName'), '/MDE.Linux')]",
+      "location": "[parameters('location')]",
+      "comments": "VM.SEC.7, VM.SEC.10 - Microsoft Defender for Endpoint (threat detection + anti-malware)",
+      "dependsOn": [
+        "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('vmName'), 'AzureMonitorLinuxAgent')]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.AzureDefenderForServers",
+        "type": "MDE.Linux",
+        "typeHandlerVersion": "1.0",
+        "autoUpgradeMinorVersion": true
+      }
+    },
+    {
       "type": "Microsoft.RecoveryServices/vaults",
       "apiVersion": "2023-04-01",
       "name": "[variables('rsvName')]",

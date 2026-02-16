@@ -25,6 +25,7 @@ const ALL_REQUIREMENTS: Requirement[] = [
   {
     id: 'EC2.1',
     title: 'EBS snapshots should not be publicly restorable',
+    type: 'SEC',
     severity: 'Critical',
     service: 'EC2',
     provider: 'AWS',
@@ -35,6 +36,7 @@ const ALL_REQUIREMENTS: Requirement[] = [
   {
     id: 'EC2.2',
     title: 'VPC default security groups should not allow inbound or outbound traffic',
+    type: 'SEC',
     severity: 'High',
     service: 'EC2',
     provider: 'AWS',
@@ -45,6 +47,7 @@ const ALL_REQUIREMENTS: Requirement[] = [
   {
     id: 'S3.1',
     title: 'S3 general purpose buckets should have block public access settings enabled',
+    type: 'SEC',
     severity: 'Medium',
     service: 'S3',
     provider: 'AWS',
@@ -55,6 +58,7 @@ const ALL_REQUIREMENTS: Requirement[] = [
   {
     id: 'IAM.1',
     title: 'IAM policies should not allow full administrative privileges',
+    type: 'SEC',
     severity: 'High',
     service: 'IAM',
     provider: 'AWS',
@@ -65,6 +69,7 @@ const ALL_REQUIREMENTS: Requirement[] = [
   {
     id: 'IAM.2',
     title: 'IAM users should not have IAM policies attached',
+    type: 'SEC',
     severity: 'Low',
     service: 'IAM',
     provider: 'AWS',
